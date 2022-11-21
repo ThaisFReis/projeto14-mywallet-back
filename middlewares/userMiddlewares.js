@@ -1,12 +1,43 @@
-import userSchema from '../schemas/userSchema.js';
+import db from '../db.js';
 
-export default function userMiddleware(req, res, next) {
-  const validation = userSchema.validate(req.body);
+async function userMiddlewares(req, res, next) {
+  
+  //Token
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.sendStatus(401);
 
-    if (validation.error) {
-        return res.status(400).send(validation.error.details[0].message);
-        }
+  //Verify token
+  try {
+    const user = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = user;
+    next();
+  }
+  catch (err) {
+    res.sendStatus(401);
+  }
+
+  try {
+    const session = await db.collection("sessions").findOne({ token });
+
+    if (!session) {
+      res.sendStatus(401);
+      return;
+    }
+
+    const user = await db.collection("users").findOne({ _id: session.userId });
+
+    if (!user) {
+      res.sendStatus(401);
+      return;
+    }
+
+    res.locals.user = user;
 
     next();
-    
+
+  } catch (err) {
+    res.sendStatus(500);
+  }
 }
+
+export default userMiddlewares;

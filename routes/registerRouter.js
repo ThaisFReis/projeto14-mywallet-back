@@ -1,10 +1,13 @@
 import { Router } from "express";
-import { registerController } from "../controllers/registerController.js";
-import tokenMiddleware from "../middlewares/tokenMiddleware.js";
 
-const registerRouter = Router();
+import { registerController, addNewEntries } from "../controllers/entriesControllers.js";
+import userMiddlewares from "../middlewares/userMiddlewares.js";
+import tokenMiddlewares from "../middlewares/tokenMiddlewares.js";
 
-registerRouter.use(tokenMiddleware);
-registerRouter.get("/entries", tokenMiddleware, registerController);
+const entriesRouter = Router();
 
-export default registerRouter;
+entriesRouter.use(tokenMiddlewares);
+entriesRouter.get("/entries", userMiddlewares, registerController);
+entriesRouter.post("/entries", userMiddlewares, addNewEntries);
+
+export default entriesRouter;
