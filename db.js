@@ -4,9 +4,9 @@ import { MongoClient } from 'mongodb';
 dotenv.config();
 
 // Database
-const dbUrl = process.env.DB_URL;
+const dbUrl = process.env.MONGO_URI || "mongodb://localhost:27017";
 const dbName = process.env.DB_NAME
-const mongoClient = new MongoClient(dbUrl);
+const mongoClient = new MongoClient(dbUrl, { useUnifiedTopology: true });
 const db = mongoClient.db(dbName);
 
 // Database connection
