@@ -1,6 +1,7 @@
 import db from "../db.js";
 import bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
+import alert from 'alert'
 
 // Import Schema
 import { userSchema, loginSchema } from "../schemas/userSchema.js";
@@ -17,7 +18,9 @@ export async function login( req, res){
         // Check if user exists
         const userExists = await db.collection("users").findOne({ email: user.email });
         if (!userExists) {
-            return res.status(401).send("Usuário inválidos");
+            res.status(401).send("Usuário ou senha inválidos");
+            alert("Usuário ou senha inválidos");
+            return;
         }
 
         // Decrypt password
@@ -29,16 +32,18 @@ export async function login( req, res){
 
             res.status(200).send({ token, name: userExists.name });
         } else {
-            return res.status(401).send("senha inválidos");
+            res.status(401).send("Usuário ou senha inválidos");
+            alert("Usuário ou senha inválidos");
+            return
         }
 
         res.status(200)
 
     } catch (error) {
         console.log(error);
-        res.sendStatus(500);
-
-
+        res.status(500).send("Erro no servidor");
+        alert("Erro no servidor");
+        return
     }
 }
 
@@ -52,8 +57,17 @@ export async function singup(req, res) {
         passwordConfirmation
      });
 
+     // Check if password and passwordConfirmation are the same
+    if (password !== passwordConfirmation) {
+        res.status(400).send("As senhas não são iguais");
+        alert("As senhas não são iguais");
+        return 
+    }
+
     if (validation.error) {
-        return res.status(400).send(validation.error.details[0].message);       
+        res.status(400).send("Formato inválido");
+        alert("Formato inválido");
+        return    
     }
 
     const encryptedPassword = await bcrypt.hash(password, 10);
@@ -67,7 +81,9 @@ export async function singup(req, res) {
          });
 
         if (userExists) {
-            return res.sendStatus(409);
+            res.status(409).send("Usuário já cadastrado");
+            alert("Usuário já cadastrado");
+            return
         }
 
         const result = await db.collection("users").insertOne({ 
@@ -81,6 +97,8 @@ export async function singup(req, res) {
 
     } catch (error) {
         console.log(error);
-        res.sendStatus(500);
+        res.status(500).send("Erro no servidor");
+        alert("Erro no servidor");
+        return
     }
 }

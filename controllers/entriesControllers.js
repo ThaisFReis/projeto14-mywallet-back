@@ -1,5 +1,6 @@
 import db from "../db.js";
 import dayjs from "dayjs";
+import alert from 'alert'
 
 //Import Schema
 import entriesSchema from "../schemas/entriesSchema.js";
@@ -10,9 +11,12 @@ async function registerController(req, res) {
     try {
         const entries = await db.collection("entries").find({ userId: user._id}).toArray();
         res.status(200).send(entries);
+        return
     } catch (error) {
         console.log(error);
-        res.sendStatus(500);
+        res.status(500).send("Erro no servidor");
+        alert("Erro no servidor");
+        return
     }
 }
 
@@ -22,7 +26,9 @@ async function addNewEntries(req, res){
     const validation = entriesSchema.validate(req.body);
 
     if (validation.error) {
-        return res.status(400).send("erro aqui");
+        res.status(400).send("Formato inválido");
+        alert("Formato inválido");
+        return
     }
 
     try{
@@ -37,9 +43,12 @@ async function addNewEntries(req, res){
         });
 
         res.sendStatus(201);
+        alert("Entrada registrada com sucesso");
+        return
     } catch (error) {
-        console.log(error);
-        res.sendStatus(500);
+        res.status(500).send("Erro no servidor");
+        alert("Erro no servidor");
+        return
     }
 }
 
