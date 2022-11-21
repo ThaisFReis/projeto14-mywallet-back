@@ -1,14 +1,11 @@
 import { Router } from 'express';
 
 // Import the auth controller
-import { login, register } from '../controllers/authControllers.js';
-
-// Import middlewares
-import userMiddlewares from '../middlewares/userMiddlewares.js';
+import { login, singup } from '../controllers/authControllers.js';
 
 const authRouter = Router();
 
 authRouter.post('/login', login);
-authRouter.post('/register', userMiddlewares, register);
+authRouter.post('/singup', singup);
 
 export default authRouter;

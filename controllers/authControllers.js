@@ -17,19 +17,19 @@ export async function login( req, res){
         // Check if user exists
         const userExists = await db.collection("users").findOne({ email: user.email });
         if (!userExists) {
-            return res.sendStatus(401);
+            return res.status(401).send("Usuário inválidos");
         }
 
         // Decrypt password
         const passwordMatch = await bcrypt.compare(user.password, userExists.password);
 
-        if (!passwordMatch) {
+        if (passwordMatch) {
             const token = uuid();
             await db.collection("sessions").insertOne({ token, userId: userExists._id });
 
             res.status(200).send({ token, name: userExists.name });
         } else {
-            res.sendStatus(401);
+            return res.status(401).send("senha inválidos");
         }
 
         res.status(200)
@@ -42,32 +42,43 @@ export async function login( req, res){
     }
 }
 
-export async function register(req, res) {
-    const newUser = req.body;
-    const validation = userSchema.validate(newUser);
+export async function singup(req, res) {
+    const { name, email, password, passwordConfirmation } = req.body;
+
+    const validation = userSchema.validate({ 
+        name, 
+        email, 
+        password,
+        passwordConfirmation
+     });
 
     if (validation.error) {
-        return res.sendStatus(400);
+        return res.status(400).send(validation.error.details[0].message);       
     }
 
+    const encryptedPassword = await bcrypt.hash(password, 10);
     try {
         const userExists = await db.collection("users").
         findOne
-        ({ email: newUser.email });
+        ({ email, 
+            name, 
+            password: encryptedPassword,
+            passwordConfirmation: encryptedPassword
+         });
 
-        if (userExists) {         
+        if (userExists) {
             return res.sendStatus(409);
         }
 
-        const passwordHash = await bcrypt.hash(newUser.password, 10);
-
-        await db.collection("users").insertOne({
-            name: newUser.name,
-            email: newUser.email,
-            password: passwordHash,
+        const result = await db.collection("users").insertOne({ 
+            name, 
+            email, 
+            password: encryptedPassword ,
+            passwordConfirmation: encryptedPassword
         });
 
-        res.sendStatus(201);
+        res.status(201).send({ id: result.insertedId, name, email });
+
     } catch (error) {
         console.log(error);
         res.sendStatus(500);

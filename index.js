@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 
 import registerRouter from './routes/registerRouter.js';
 import authRouter from './routes/authRouter.js';
-import entriesRouter from './routes/entriesRouter.js';
 
 dotenv.config();
 
@@ -16,7 +15,6 @@ app.use(json());
 // Routers
 app.use(authRouter);
 app.use(registerRouter);
-app.use(entriesRouter);
 
 const PORT = process.env.PORT || 5000;
 

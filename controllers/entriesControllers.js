@@ -5,11 +5,11 @@ import dayjs from "dayjs";
 import entriesSchema from "../schemas/entriesSchema.js";
 
 async function registerController(req, res) {
-    const user = req.locals.user;
+    const { user } = res.locals;
 
     try {
         const entries = await db.collection("entries").find({ userId: user._id}).toArray();
-        res.send(...user, entries);
+        res.status(200).send(entries);
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
@@ -22,7 +22,7 @@ async function addNewEntries(req, res){
     const validation = entriesSchema.validate(req.body);
 
     if (validation.error) {
-        return res.sendStatus(400);
+        return res.status(400).send("erro aqui");
     }
 
     try{
@@ -33,7 +33,7 @@ async function addNewEntries(req, res){
             value,
             description,
             type,
-            date: dayjs().format("DD/MM/YYYY"),
+            date: dayjs().format("DD/MM/YY"),
         });
 
         res.sendStatus(201);

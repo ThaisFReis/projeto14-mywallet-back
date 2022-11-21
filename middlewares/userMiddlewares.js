@@ -4,23 +4,17 @@ async function userMiddlewares(req, res, next) {
   
   //Token
   const token = req.headers.authorization?.replace('Bearer ', '');
-  if (!token) return res.sendStatus(401);
+  if (!token) {
+    return res.status(401).json({ message: 'Token não encontrado' });
+  }
 
-  //Verify token
-  try {
-    const user = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = user;
-    next();
-  }
-  catch (err) {
-    res.sendStatus(401);
-  }
 
   try {
     const session = await db.collection("sessions").findOne({ token });
 
     if (!session) {
       res.sendStatus(401);
+      console.log('Token inválido');
       return;
     }
 
@@ -28,15 +22,19 @@ async function userMiddlewares(req, res, next) {
 
     if (!user) {
       res.sendStatus(401);
+      console.log('Usuário não encontrado');
       return;
     }
 
     res.locals.user = user;
+    res.locals.session = session;
+    res.locals.token = token;
 
     next();
 
   } catch (err) {
     res.sendStatus(500);
+    console.log(err, 'Erro no middleware');
   }
 }
 
