@@ -3,6 +3,7 @@ import { MongoClient } from 'mongodb';
 
 dotenv.config();
 
+
 // Database
 const mongoClient = new MongoClient(process.env.MONGO_URI);
 const db = mongoClient.db(process.env.DB_NAME);
