@@ -4,10 +4,8 @@ import { MongoClient } from 'mongodb';
 dotenv.config();
 
 // Database
-const dbUrl = process.env.MONGO_URI || "mongodb://localhost:27017";
-const dbName = process.env.DB_NAME
-const mongoClient = new MongoClient(dbUrl, { useUnifiedTopology: true });
-const db = mongoClient.db(dbName);
+const mongoClient = new MongoClient(process.env.MONGO_URI);
+const db = mongoClient.db(process.env.DB_NAME);
 
 // Database connection
 mongoClient.connect().then(() => {
